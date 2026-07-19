@@ -1,4 +1,27 @@
 {
+  "name": "مصروفاتي",
+  "short_name": "مصروفاتي",
+  "description": "تطبيق لإدارة المصروفات الشخصية والأقساط",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
+[20/07/2026 01:50 ص] Hussien: {
   "background_color": "#ffffff",
   "dir": "rtl",
   "display": "standalone",
@@ -9,5 +32,17 @@
   "start_url": "index.html",
   "theme_color": "#007bff",
   "description": "تطبيق لإدارة المصروفات الشخصية والأقساط",
-  "lang": "ar"
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "icon-192.png.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
 }
