@@ -1,12 +1,12 @@
 {
   "background_color": "#ffffff",
-  "dir": "ltr",
+  "dir": "rtl",
   "display": "standalone",
   "name": "مصروفاتي",
   "orientation": "any",
   "scope": "/",
   "short_name": "مصروفاتي",
-  "start_url": "/https://babilstore90-gif.github.io/mybr1/",
+  "start_url": "index.html",
   "theme_color": "#007bff",
   "description": "تطبيق لإدارة المصروفات الشخصية والأقساط",
   "lang": "ar"
