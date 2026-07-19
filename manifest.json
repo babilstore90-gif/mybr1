@@ -1,23 +1,13 @@
 {
-  "name": "مصروفاتي",
-  "short_name": "مصروفاتي",
-  "description": "تطبيق لإدارة المصروفات الشخصية والأقساط",
-  "start_url": "index.html",
-  "display": "standalone",
   "background_color": "#ffffff",
+  "dir": "ltr",
+  "display": "standalone",
+  "name": "مصروفاتي",
+  "orientation": "any",
+  "scope": "/",
+  "short_name": "مصروفاتي",
+  "start_url": "/https://babilstore90-gif.github.io/mybr1/",
   "theme_color": "#007bff",
-  "lang": "ar",
-  "dir": "rtl",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "description": "تطبيق لإدارة المصروفات الشخصية والأقساط",
+  "lang": "ar"
 }
