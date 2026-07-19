@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق المصروفات الشخصية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+
+        body {
+            background: #f0f4f8;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a2a3a;
+            font-size: 24px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 15px;
+        }
+
+        .balance-box {
+            background: linear-gradient(135deg, #007bff, #00bcd4);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .balance-box h2 {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .balance-box .amount {
+            font-size: 36px;
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .nav-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .nav-buttons button.active {
+            border-color: #007bff;
+            background: #007bff;
+            color: white;
+        }
+
+        .nav-buttons button:hover {
+            background: #f0f4f8;
+        }
+
+        .nav-buttons button.active:hover {
+            background: #0056b3;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .input-group select option {
+            padding: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+            transform: scale(1.02);
+        }
+
+        .btn-date-filter {
+            width: 100%;
+            padding: 14px;
+            background: #8B6914;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-date-filter:hover {
+            background: #6b4f0e;
+            transform: scale(1.02);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #a71d2a;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #1e7e34;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            width: auto;
+            display: inline-block;
+        }
+
+        .transactions {
+            margin-top: 25px;
+        }
+
+        .transactions h3 {
+            font-size: 18px;
+            color: #1a2a3a;
+            margin-bottom: 10px;
+        }
+
+        #transactionList {
+            max-height: 370px;
+            overflow-y: auto;
+            padding-left: 5px;
+        }
+
+        #transactionList::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #transactionList::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        #transactionList::-webkit-scrollbar-thumb {
+            background: #007bff;
+            border-radius: 10px;
+        }
+
+        #transactionList::-webkit-scrollbar-thumb:hover {
+            background: #0056b3;
+        }
+
+        .transaction-item {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            color: #1a2a3a;
+            border-right: 5px solid #6c757d;
+        }
+
+        .transaction-item.income {
+            background: #d4edda;
+            border-right-color: #28a745;
+        }
+
+        .transaction-item.expense {
+            background: #f8d7da;
+            border-right-color: #dc3545;
+        }
+
+        .transaction-item.installment-paid {
+            background: #cce5ff;
+            border-right-color: #007bff;
+        }
+
+        .transaction-item.installment-unpaid {
+            background: #fff3cd;
+            border-right-color: #ffc107;
+        }
+
+        .transaction-item .info {
+            flex: 1;
+        }
+
+        .transaction-item .info .cat {
+            font-weight: bold;
+            font-size: 16px;
+            color: #1a2a3a;
+        }
+
+        .transaction-item .info .cat .color-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 6px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .transaction-item .info .date {
+            font-size: 12px;
+            color: #444;
+            margin-top: 2px;
+        }
+
+        .transaction-item .info .installment-info {
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .transaction-item .info .installment-info.paid {
+            color: #0056b3;
+        }
+
+        .transaction-item .info .installment-info.unpaid {
+            color: #856404;
+        }
+
+        .transaction-item .amount {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .transaction-item .amount.income {
+            color: #1e7e34;
+        }
+
+        .transaction-item .amount.expense {
+            color: #b22234;
+        }
+
+        .transaction-item .actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #b22234;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0 8px;
+            font-weight: bold;
+        }
+
+        .delete-btn:hover {
+            color: #a71d2a;
+            transform: scale(1.2);
+        }
+
+        .installment-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            min-width: 70px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .installment-btn:hover {
+            background: #1e7e34;
+            transform: scale(1.05);
+        }
+
+        .installment-btn:active {
+            transform: scale(0.95);
+        }
+
+        .installment-btn.paid {
+            background: #6c757d;
+            cursor: default;
+            transform: none;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+            font-weight: bold;
+        }
+
+        .filter-btns {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btns button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.3s;
+            color: white;
+            min-width: 60px;
+        }
+
+        .filter-btns button[data-filter="all"] {
+            background: #6c757d;
+        }
+
+        .filter-btns button[data-filter="all"].active {
+            background: #343a40;
+            transform: scale(1.05);
+        }
+
+        .filter-btns button[data-filter="income"] {
+            background: #28a745;
+        }
+
+        .filter-btns button[data-filter="income"].active {
+            background: #1e7e34;
+            transform: scale(1.05);
+        }
+
+        .filter-btns button[data-filter="expense"] {
+            background: #dc3545;
+        }
+
+        .filter-btns button[data-filter="expense"].active {
+            background: #a71d2a;
+            transform: scale(1.05);
+        }
+
+        .filter-btns button[data-filter="installment"] {
+            background: #fd7e14;
+        }
+
+        .filter-btns button[data-filter="installment"].active {
+            background: #e06b0a;
+            transform: scale(1.05);
+        }
+
+        .filter-btns button:hover {
+            transform: scale(1.02);
+            opacity: 0.9;
+        }
+
+        .custom-category-input {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .custom-category-input input {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .custom-category-input input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .custom-category-input button {
+            padding: 8px 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .custom-category-input button:hover {
+            background: #1e7e34;
+        }
+
+        .notification-permission {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        .notification-permission button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .installment-summary {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .installment-summary div {
+            flex: 1;
+        }
+
+        .installment-summary .number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .installment-summary .label {
+            font-size: 12px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .installment-summary .total {
+            color: #007bff;
+        }
+        .installment-summary .paid {
+            color: #28a745;
+        }
+        .installment-summary .unpaid {
+            color: #dc3545;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .installment-item {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-right: 5px solid #6c757d;
+            color: #1a2a3a;
+        }
+
+        .installment-item.paid {
+            background: #cce5ff;
+            border-right-color: #007bff;
+        }
+
+        .installment-item.unpaid {
+            background: #fff3cd;
+            border-right-color: #ffc107;
+        }
+
+        .installment-item .info {
+            flex: 1;
+        }
+
+        .installment-item .info .name {
+            font-weight: bold;
+            font-size: 16px;
+            color: #1a2a3a;
+        }
+
+        .installment-item .info .details {
+            font-size: 12px;
+            color: #444;
+            margin-top: 2px;
+        }
+
+        .installment-item .amount {
+            font-weight: bold;
+            font-size: 18px;
+            color: #b22234;
+        }
+
+        .installment-item .actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .badge-paid {
+            background: #007bff;
+            color: white;
+        }
+
+        .badge-unpaid {
+            background: #ffc107;
+            color: #333;
+        }
+
+        /* ===== نافذة البحث بالتاريخ ===== */
+        .date-filter-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .date-filter-modal.show {
+            display: flex;
+        }
+
+        .date-filter-content {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            max-width: 400px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .date-filter-content h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #1a2a3a;
+        }
+
+        .date-filter-content .input-group {
+            margin-bottom: 12px;
+        }
+
+        .date-filter-content .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .date-filter-content .btn-group button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .date-filter-content .btn-group .btn-search {
+            background: #8B6914;
+            color: white;
+        }
+
+        .date-filter-content .btn-group .btn-search:hover {
+            background: #6b4f0e;
+        }
+
+        .date-filter-content .btn-group .btn-close {
+            background: #dc3545;
+            color: white;
+        }
+
+        .date-filter-content .btn-group .btn-close:hover {
+            background: #a71d2a;
+        }
+
+        .date-filter-results {
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .date-filter-results::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .date-filter-results::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .date-filter-results::-webkit-scrollbar-thumb {
+            background: #8B6914;
+            border-radius: 10px;
+        }
+
+        .date-filter-results .result-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            border-right: 4px solid #8B6914;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .date-filter-results .result-item .info {
+            flex: 1;
+        }
+
+        .date-filter-results .result-item .info .cat {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .date-filter-results .result-item .info .date {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .date-filter-results .result-item .amount {
+            font-weight: bold;
+        }
+
+        .date-filter-results .result-item .amount.income {
+            color: #28a745;
+        }
+
+        .date-filter-results .result-item .amount.expense {
+            color: #dc3545;
+        }
+
+        .date-filter-results .total-result {
+            text-align: center;
+            font-weight: bold;
+            padding: 10px;
+            background: #e8f0fe;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app">
+        <h1>📊 مصروفاتي</h1>
+
+        <div class="balance-box">
+            <h2>الرصيد الحالي</h2>
+            <div class="amount" id="balanceDisplay">0</div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <div style="flex:1; background: #28a745; color: white; padding: 10px; border-radius: 10px; text-align: center;">
+                <div style="font-size:12px;">إجمالي الدخل</div>
+                <div id="totalIncome" style="font-size:20px; font-weight:bold;">0</div>
+            </div>
+            <div style="flex:1; background: #dc3545; color: white; padding: 10px; border-radius: 10px; text-align: center;">
+                <div style="font-size:12px;">إجمالي المصروفات</div>
+                <div id="totalExpense" style="font-size:20px; font-weight:bold;">0</div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <button class="active" data-page="main" onclick="switchPage('main')">📋 الرئيسية</button>
+            <button data-page="installments" onclick="switchPage('installments')">📅 الأقساط</button>
+        </div>
+
+        <div class="notification-permission" id="notifPermission">
+            <p>🔔 فعل الإشعارات لتنبيهات الأقساط</p>
+            <button onclick="requestNotificationPermission()">تفعيل الإشعارات</button>
+        </div>
+
+        <!-- ===== الصفحة الرئيسية ===== -->
+        <div class="page active" id="page-main">
+            <div class="input-group">
+                <label>📌 النوع</label>
+                <select id="typeSelect" onchange="populateCategories()">
+                    <option value="income">دخل</option>
+                    <option value="expense">مصروف</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>🏷️ التصنيف</label>
+                <select id="categorySelect"></select>
+                <div class="custom-category-input">
+                    <input type="text" id="newCategoryInput" placeholder="تصنيف جديد...">
+                    <button onclick="addCustomCategory()">➕ إضافة</button>
+                </div>
+            </div>
+            <div class="input-group">
+                <label>💰 المبلغ</label>
+                <input type="number" id="amountInput" placeholder="أدخل المبلغ">
+            </div>
+            <div class="input-group">
+                <label>📝 ملاحظة</label>
+                <input type="text" id="noteInput" placeholder="اختياري">
+            </div>
+
+            <button class="btn" id="addBtn">➕ إضافة</button>
+            <button class="btn-date-filter" onclick="openDateFilter()">📅 تعاملات في تاريخ محدد</button>
+
+            <div class="transactions">
+                <h3>المعاملات</h3>
+                <div class="filter-btns">
+                    <button class="active" data-filter="all" onclick="setFilter('all')">الكل</button>
+                    <button data-filter="income" onclick="setFilter('income')">الدخل</button>
+                    <button data-filter="expense" onclick="setFilter('expense')">المصروف</button>
+                    <button data-filter="installment" onclick="setFilter('installment')">الأقساط</button>
+                </div>
+                <div id="transactionList"></div>
+            </div>
+        </div>
+
+        <!-- ===== صفحة الأقساط ===== -->
+        <div class="page" id="page-installments">
+            <h3 style="margin-bottom: 15px;">📅 إدارة الأقساط</h3>
+
+            <div class="installment-summary">
+                <div>
+                    <div class="number total" id="totalInstallments">0</div>
+                    <div class="label">إجمالي الأقساط</div>
+                </div>
+                <div>
+                    <div class="number paid" id="paidInstallments">0</div>
+                    <div class="label">مدفوع</div>
+                </div>
+                <div>
+                    <div class="number unpaid" id="unpaidInstallments">0</div>
+                    <div class="label">غير مدفوع</div>
+                </div>
+            </div>
+
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 15px;">
+                <div class="input-group">
+                    <label>📝 نوع القسط</label>
+                    <input type="text" id="installmentNameInput" placeholder="مثل: قسط السيارة">
+                </div>
+                <div class="input-group">
+                    <label>💰 مبلغ القسط</label>
+                    <input type="number" id="installmentAmountInput" placeholder="أدخل المبلغ">
+                </div>
+                <div class="input-group">
+                    <label>📅 تاريخ الاستحقاق</label>
+                    <input type="date" id="installmentDateInput">
+                </div>
+                <button class="btn btn-success" onclick="addInstallment()">➕ إضافة قسط</button>
+            </div>
+
+            <h4 style="margin-bottom: 10px;">قائمة الأقساط</h4>
+            <div id="installmentList"></div>
+        </div>
+    </div>
+
+    <!-- ===== نافذة البحث بالتاريخ ===== -->
+    <div class="date-filter-modal" id="dateFilterModal">
+        <div class="date-filter-content">
+            <h3>📅 البحث بالتاريخ</h3>
+            <div class="input-group">
+                <label>📅 من تاريخ</label>
+                <input type="date" id="filterDateFrom">
+            </div>
+            <div class="input-group">
+                <label>📅 إلى تاريخ</label>
+                <input type="date" id="filterDateTo">
+            </div>
+            <div class="btn-group">
+                <button class="btn-search" onclick="filterByDate()">🔍 بحث</button>
+                <button class="btn-close" onclick="closeDateFilter()">✕ إغلاق</button>
+            </div>
+            <div class="date-filter-results" id="dateFilterResults"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== البيانات =====
+        let transactions = [];
+        let currentFilter = 'all';
+        let currentPage = 'main';
+
+        const defaultCategories = {
+            income: [
+                { name: 'راتب', color: '#17a2b8' },
+                { name: 'دخل إضافي', color: '#20c997' },
+                { name: 'تجميعاتي وتوفيري', color: '#6610f2' }
+            ],
+            expense: [
+                { name: 'أسواق', color: '#28a745' },
+                { name: 'أكل البيت', color: '#fd7e14' },
+                { name: 'هدايا', color: '#6f42c1' },
+                { name: 'مكافئات ميلا', color: '#007bff' },
+                { name: 'مواصلات', color: '#ffc107' },
+                { name: 'أقساط', color: '#dc3545' }
+            ]
+        };
+
+        let customCategories = {
+            income: [],
+            expense: []
+        };
+
+        // ===== دالة توليد التاريخ بصيغة موحدة =====
+        function getCurrentDateStr() {
+            const now = new Date();
+            return now.getFullYear() + '-' +
+                String(now.getMonth() + 1).padStart(2, '0') + '-' +
+                String(now.getDate()).padStart(2, '0') + ' ' +
+                String(now.getHours()).padStart(2, '0') + ':' +
+                String(now.getMinutes()).padStart(2, '0') + ':' +
+                String(now.getSeconds()).padStart(2, '0');
+        }
+
+        // ===== دالة عرض التاريخ بشكل جميل =====
+        function formatDateDisplay(dateStr) {
+            if (!dateStr) return 'بدون تاريخ';
+            const match = dateStr.match(/(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})/);
+            if (match) {
+                return match[3] + '/' + match[2] + '/' + match[1] + ' ' + match[4] + ':' + match[5];
+            }
+            return dateStr;
+        }
+
+        // ===== دالة تصحيح التواريخ القديمة تلقائياً =====
+        function fixOldDates() {
+            let fixedCount = 0;
+            transactions.forEach(t => {
+                // إذا كان التاريخ بصيغة قديمة (YYYY/MM/DD)
+                if (t.date && t.date.includes('/')) {
+                    const match = t.date.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+                    if (match) {
+                        const year = match[1];
+                        const month = String(parseInt(match[2])).padStart(2, '0');
+                        const day = String(parseInt(match[3])).padStart(2, '0');
+                        const timeMatch = t.date.match(/(\d{1,2}):(\d{1,2}):(\d{1,2})/);
+                        let time = '';
+                        if (timeMatch) {
+                            time = ' ' + String(parseInt(timeMatch[1])).padStart(2, '0') + ':' +
+                                String(parseInt(timeMatch[2])).padStart(2, '0') + ':' +
+                                String(parseInt(timeMatch[3])).padStart(2, '0');
+                        } else {
+                            time = ' 00:00:00';
+                        }
+                        t.date = year + '-' + month + '-' + day + time;
+                        fixedCount++;
+                    }
+                }
+                // إذا كان التاريخ بصيغة عربية أخرى (DD/MM/YYYY)
+                else if (t.date && t.date.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)) {
+                    const match = t.date.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+                    if (match) {
+                        const year = match[3];
+                        const month = String(parseInt(match[2])).padStart(2, '0');
+                        const day = String(parseInt(match[1])).padStart(2, '0');
+                        const timeMatch = t.date.match(/(\d{1,2}):(\d{1,2}):(\d{1,2})/);
+                        let time = '';
+                        if (timeMatch) {
+                            time = ' ' + String(parseInt(timeMatch[1])).padStart(2, '0') + ':' +
+                                String(parseInt(timeMatch[2])).padStart(2, '0') + ':' +
+                                String(parseInt(timeMatch[3])).padStart(2, '0');
+                        } else {
+                            time = ' 00:00:00';
+                        }
+                        t.date = year + '-' + month + '-' + day + time;
+                        fixedCount++;
+                    }
+                }
+            });
+
+            if (fixedCount > 0) {
+                saveData();
+                console.log('✅ تم تصحيح ' + fixedCount + ' تاريخ قديم');
+            }
+        }
+
+        // ===== تحميل وحفظ البيانات =====
+        function loadData() {
+            const saved = localStorage.getItem('financeData');
+            if (saved) {
+                transactions = JSON.parse(saved);
+                // تصحيح التواريخ القديمة تلقائياً
+                fixOldDates();
+            }
+
+            const savedCustom = localStorage.getItem('customCategories');
+            if (savedCustom) {
+                customCategories = JSON.parse(savedCustom);
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('financeData', JSON.stringify(transactions));
+            localStorage.setItem('customCategories', JSON.stringify(customCategories));
+        }
+
+        // ===== إدارة التصنيفات =====
+        function getAllCategories(type) {
+            const defaults = defaultCategories[type] || [];
+            const customs = customCategories[type] || [];
+            return [...defaults, ...customs];
+        }
+
+        function getCategoryColor(type, categoryName) {
+            const all = getAllCategories(type);
+            const found = all.find(c => c.name === categoryName);
+            return found ? found.color : '#6c757d';
+        }
+
+        function populateCategories() {
+            const type = document.getElementById('typeSelect').value;
+            const select = document.getElementById('categorySelect');
+            const categories = getAllCategories(type);
+
+            select.innerHTML = '';
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.name;
+                option.textContent = cat.name;
+                option.style.backgroundColor = cat.color + '20';
+                option.style.color = cat.color;
+                select.appendChild(option);
+            });
+        }
+
+        function addCustomCategory() {
+            const input = document.getElementById('newCategoryInput');
+            const name = input.value.trim();
+            if (!name) {
+                alert('الرجاء إدخال اسم التصنيف');
+                return;
+            }
+
+            const type = document.getElementById('typeSelect').value;
+            const allCategories = getAllCategories(type);
+
+            if (allCategories.some(c => c.name === name)) {
+                alert('هذا التصنيف موجود بالفعل');
+                return;
+            }
+
+            const randomColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+
+            customCategories[type].push({ name, color: randomColor });
+            saveData();
+            populateCategories();
+            input.value = '';
+            showNotification('✅ تم إضافة التصنيف "' + name + '"', '', 'success');
+        }
+
+        // ===== الأقساط =====
+        function addInstallment() {
+            const name = document.getElementById('installmentNameInput').value.trim();
+            const amount = parseFloat(document.getElementById('installmentAmountInput').value);
+            const dueDate = document.getElementById('installmentDateInput').value;
+
+            if (!name) {
+                alert('الرجاء إدخال نوع القسط');
+                return;
+            }
+
+            if (isNaN(amount) || amount <= 0) {
+                alert('الرجاء إدخال مبلغ صحيح');
+                return;
+            }
+
+            if (!dueDate) {
+                alert('الرجاء تحديد تاريخ الاستحقاق');
+                return;
+            }
+
+            const dateStr = getCurrentDateStr();
+
+            const transaction = {
+                type: 'expense',
+                category: 'أقساط',
+                amount: amount,
+                note: name,
+                date: dateStr,
+                isInstallment: true,
+                isPaid: false,
+                dueDate: dueDate,
+                installmentName: name,
+                affectsBalance: false
+            };
+
+            transactions.push(transaction);
+            saveData();
+            updateAll();
+
+            document.getElementById('installmentNameInput').value = '';
+            document.getElementById('installmentAmountInput').value = '';
+            document.getElementById('installmentDateInput').value = '';
+
+            showNotification('✅ تم إضافة القسط', name + ': ' + amount, 'success');
+            renderInstallments();
+        }
+
+        function payInstallment(index) {
+            const t = transactions[index];
+            if (!t || t.isPaid) return;
+
+            if (confirm(`هل أنت متأكد من دفع قسط "${t.installmentName}"؟`)) {
+                t.isPaid = true;
+                t.affectsBalance = true;
+                saveData();
+                updateAll();
+                renderInstallments();
+                showNotification('✅ تم دفع القسط', t.installmentName, 'success');
+            }
+        }
+
+        function deleteInstallment(index) {
+            if (confirm('هل أنت متأكد من حذف هذا القسط؟')) {
+                transactions.splice(index, 1);
+                saveData();
+                updateAll();
+                renderInstallments();
+                showNotification('🗑️ تم حذف القسط', '', 'info');
+            }
+        }
+
+        function renderInstallments() {
+            const list = document.getElementById('installmentList');
+            const installments = transactions.filter(t => t.isInstallment);
+
+            const total = installments.length;
+            const paid = installments.filter(t => t.isPaid).length;
+            const unpaid = total - paid;
+
+            document.getElementById('totalInstallments').textContent = total;
+            document.getElementById('paidInstallments').textContent = paid;
+            document.getElementById('unpaidInstallments').textContent = unpaid;
+
+            if (installments.length === 0) {
+                list.innerHTML = `<div class="empty-msg">لا توجد أقساط</div>`;
+                return;
+            }
+
+            list.innerHTML = '';
+            installments.forEach((t, index) => {
+                const realIndex = transactions.indexOf(t);
+                const div = document.createElement('div');
+                div.className = `installment-item ${t.isPaid ? 'paid' : 'unpaid'}`;
+
+                const info = document.createElement('div');
+                info.className = 'info';
+                info.innerHTML = `
+                        <div class="name">${t.installmentName || t.category}</div>
+                        <div class="details">
+                            📅 ${t.dueDate || 'بدون تاريخ'} | 
+                            <span class="badge ${t.isPaid ? 'badge-paid' : 'badge-unpaid'}">
+                                ${t.isPaid ? '✅ مدفوع' : '⏳ غير مدفوع'}
+                            </span>
+                        </div>
+                    `;
+
+                const amountSpan = document.createElement('span');
+                amountSpan.className = 'amount expense';
+                amountSpan.textContent = `-${t.amount}`;
+
+                const actions = document.createElement('div');
+                actions.className = 'actions';
+
+                if (!t.isPaid) {
+                    const payBtn = document.createElement('button');
+                    payBtn.className = 'installment-btn';
+                    payBtn.textContent = '✅ دفع';
+                    payBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        payInstallment(realIndex);
+                    };
+                    actions.appendChild(payBtn);
+                }
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = '✕';
+                deleteBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    deleteInstallment(realIndex);
+                };
+                actions.appendChild(deleteBtn);
+
+                div.appendChild(info);
+                div.appendChild(amountSpan);
+                div.appendChild(actions);
+                list.appendChild(div);
+            });
+        }
+
+        // ===== الإشعارات =====
+        function requestNotificationPermission() {
+            if ('Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        document.getElementById('notifPermission').style.display = 'none';
+                        showNotification('✅ تم تفعيل الإشعارات', 'سيتم تنبيهك عند اقتراب موعد الأقساط', 'success');
+                    } else {
+                        alert('لتفعيل الإشعارات، قم بالسماح من إعدادات المتصفح');
+                    }
+                });
+            } else {
+                alert('المتصفح لا يدعم الإشعارات');
+            }
+        }
+
+        function showNotification(title, body, type = 'info') {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, {
+                    body: body,
+                    icon: type === 'warning' ? '⚠️' : type === 'error' ? '🔴' : '💡'
+                });
+            }
+
+            const notif = document.createElement('div');
+            const colors = {
+                success: '#28a745',
+                warning: '#ffc107',
+                error: '#dc3545',
+                info: '#007bff'
+            };
+            notif.style.cssText = `
+                    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+                    background: ${colors[type] || colors.info};
+                    color: ${type === 'warning' ? '#333' : 'white'};
+                    padding: 15px 25px;
+                    border-radius: 12px;
+                    z-index: 1000;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+                    animation: slideDown 0.5s ease;
+                    max-width: 90%;
+                    text-align: center;
+                    font-weight: bold;
+                `;
+            notif.innerHTML = `<strong>${title}</strong><br><small>${body}</small>`;
+            document.body.appendChild(notif);
+            setTimeout(() => {
+                notif.style.opacity = '0';
+                notif.style.transition = 'opacity 0.5s';
+                setTimeout(() => notif.remove(), 500);
+            }, 5000);
+        }
+
+        function checkInstallments() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            transactions.forEach(t => {
+                if (t.isInstallment && !t.isPaid && t.dueDate) {
+                    const dueDate = new Date(t.dueDate);
+                    dueDate.setHours(0, 0, 0, 0);
+
+                    const diffTime = dueDate - today;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays <= 3 && diffDays >= 0) {
+                        showNotification(
+                            `⚠️ قسط مستحق: ${t.installmentName || t.category}`,
+                            `المبلغ: ${t.amount} - التاريخ: ${t.dueDate}`,
+                            'warning'
+                        );
+                    } else if (diffDays < 0 && !t.isPaid) {
+                        showNotification(
+                            `🔴 قسط متأخر: ${t.installmentName || t.category}`,
+                            `المبلغ: ${t.amount} - متأخر ${Math.abs(diffDays)} يوم`,
+                            'error'
+                        );
+                    }
+                }
+            });
+        }
+
+        // ===== حساب الرصيد والإحصائيات =====
+        function calculateBalance() {
+            let balance = 0;
+            transactions.forEach(t => {
+                if (t.type === 'income') {
+                    balance += t.amount;
+                } else if (t.type === 'expense') {
+                    if (!t.isInstallment || (t.isInstallment && t.isPaid && t.affectsBalance)) {
+                        balance -= t.amount;
+                    }
+                }
+            });
+            return balance;
+        }
+
+        function calculateStats() {
+            let totalIncome = 0,
+                totalExpense = 0;
+            transactions.forEach(t => {
+                if (t.type === 'income') {
+                    totalIncome += t.amount;
+                } else if (t.type === 'expense') {
+                    if (!t.isInstallment || (t.isInstallment && t.isPaid && t.affectsBalance)) {
+                        totalExpense += t.amount;
+                    }
+                }
+            });
+            document.getElementById('totalIncome').textContent = totalIncome;
+            document.getElementById('totalExpense').textContent = totalExpense;
+        }
+
+        function updateBalance() {
+            document.getElementById('balanceDisplay').textContent = calculateBalance();
+            calculateStats();
+        }
+
+        // ===== عرض المعاملات =====
+        function renderTransactions() {
+            const list = document.getElementById('transactionList');
+            let filtered = transactions;
+
+            if (currentFilter === 'income') {
+                filtered = transactions.filter(t => t.type === 'income');
+            } else if (currentFilter === 'expense') {
+                filtered = transactions.filter(t => t.type === 'expense' && !t.isInstallment);
+            } else if (currentFilter === 'installment') {
+                filtered = transactions.filter(t => t.isInstallment);
+            }
+
+            filtered = [...filtered].reverse();
+
+            if (filtered.length === 0) {
+                list.innerHTML = `<div class="empty-msg">لا توجد معاملات</div>`;
+                return;
+            }
+
+            list.innerHTML = '';
+            filtered.forEach((t, index) => {
+                const div = document.createElement('div');
+                const color = getCategoryColor(t.type, t.category);
+
+                let className = 'transaction-item';
+                if (t.type === 'income') {
+                    className += ' income';
+                } else if (t.isInstallment) {
+                    className += t.isPaid ? ' installment-paid' : ' installment-unpaid';
+                } else {
+                    className += ' expense';
+                }
+                div.className = className;
+
+                const info = document.createElement('div');
+                info.className = 'info';
+
+                let catHtml = `
+                        <div class="cat">
+                            <span class="color-dot" style="background:${color}"></span>
+                            ${t.category || 'غير مصنف'}
+                        </div>
+                        <div class="date">${formatDateDisplay(t.date)} ${t.note ? '| ' + t.note : ''}</div>
+                    `;
+
+                if (t.isInstallment) {
+                    const status = t.isPaid ? '✅ مدفوع' : '⏳ غير مدفوع';
+                    const statusClass = t.isPaid ? 'paid' : 'unpaid';
+                    catHtml += `
+                            <div class="installment-info ${statusClass}">
+                                📅 ${t.dueDate || 'بدون تاريخ'} | ${status}
+                                ${t.isPaid ? '' : ' (لا يؤثر على الرصيد)'}
+                            </div>
+                        `;
+                }
+
+                info.innerHTML = catHtml;
+
+                const amountSpan = document.createElement('span');
+                amountSpan.className = `amount ${t.type === 'income' ? 'income' : 'expense'}`;
+                amountSpan.textContent = t.type === 'income' ? `+${t.amount}` : `-${t.amount}`;
+
+                const actions = document.createElement('div');
+                actions.className = 'actions';
+
+                if (t.isInstallment && !t.isPaid) {
+                    const payBtn = document.createElement('button');
+                    payBtn.className = 'installment-btn';
+                    payBtn.textContent = '✅ دفع';
+                    payBtn.onclick = function(e) {
+                        e.stopPropagation();
+                        const realIndex = transactions.indexOf(t);
+                        if (realIndex !== -1) {
+                            payInstallment(realIndex);
+                        }
+                    };
+                    actions.appendChild(payBtn);
+                }
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.textContent = '✕';
+                deleteBtn.onclick = function(e) {
+                    e.stopPropagation();
+                    if (confirm('هل أنت متأكد من حذف هذه المعاملة؟')) {
+                        const realIndex = transactions.indexOf(t);
+                        if (realIndex !== -1) {
+                            transactions.splice(realIndex, 1);
+                            saveData();
+                            updateAll();
+                            renderInstallments();
+                            showNotification('🗑️ تم حذف المعاملة', '', 'info');
+                        }
+                    }
+                };
+                actions.appendChild(deleteBtn);
+
+                div.appendChild(info);
+                div.appendChild(amountSpan);
+                div.appendChild(actions);
+                list.appendChild(div);
+            });
+        }
+
+        // ===== إضافة معاملة عادية =====
+        function addTransaction() {
+            const type = document.getElementById('typeSelect').value;
+            const category = document.getElementById('categorySelect').value;
+            const amount = parseFloat(document.getElementById('amountInput').value);
+            const note = document.getElementById('noteInput').value.trim();
+
+            if (isNaN(amount) || amount <= 0) {
+                alert('الرجاء إدخال مبلغ صحيح');
+                return;
+            }
+
+            const dateStr = getCurrentDateStr();
+
+            const transaction = {
+                type: type,
+                category: category,
+                amount: amount,
+                note: note,
+                date: dateStr,
+                isInstallment: false,
+                isPaid: false,
+                dueDate: null,
+                installmentName: null,
+                affectsBalance: true
+            };
+
+            transactions.push(transaction);
+            saveData();
+            updateAll();
+
+            document.getElementById('amountInput').value = '';
+            document.getElementById('noteInput').value = '';
+
+            showNotification('✅ تمت الإضافة بنجاح', `${category}: ${amount}`, 'success');
+        }
+
+        // ===== البحث بالتاريخ =====
+        function openDateFilter() {
+            document.getElementById('dateFilterModal').classList.add('show');
+            document.getElementById('filterDateFrom').value = '';
+            document.getElementById('filterDateTo').value = '';
+            document.getElementById('dateFilterResults').innerHTML = '';
+        }
+
+        function closeDateFilter() {
+            document.getElementById('dateFilterModal').classList.remove('show');
+        }
+
+        function filterByDate() {
+            const from = document.getElementById('filterDateFrom').value;
+            const to = document.getElementById('filterDateTo').value;
+            const resultsDiv = document.getElementById('dateFilterResults');
+
+            if (!from || !to) {
+                resultsDiv.innerHTML =
+                    `<div style="text-align:center;color:#dc3545;font-weight:bold;">⚠️ الرجاء تحديد تاريخ من وإلى</div>`;
+                return;
+            }
+
+            const fromDate = new Date(from + 'T00:00:00');
+            const toDate = new Date(to + 'T23:59:59');
+
+            const filtered = transactions.filter(t => {
+                // استخراج التاريخ من الصيغة الموحدة YYYY-MM-DD
+                const dateMatch = t.date.match(/(\d{4})-(\d{2})-(\d{2})/);
+                if (!dateMatch) return false;
+
+                const year = parseInt(dateMatch[1]);
+                const month = parseInt(dateMatch[2]) - 1;
+                const day = parseInt(dateMatch[3]);
+
+                const tDate = new Date(year, month, day);
+                return tDate >= fromDate && tDate <= toDate;
+            });
+
+            if (filtered.length === 0) {
+                resultsDiv.innerHTML =
+                    `<div style="text-align:center;color:#666;font-weight:bold;">لا توجد معاملات في هذه الفترة</div>`;
+                return;
+            }
+
+            let totalIncome = 0;
+            let totalExpense = 0;
+
+            let html = '';
+            filtered.forEach(t => {
+                if (t.type === 'income') totalIncome += t.amount;
+                else if (t.type === 'expense') totalExpense += t.amount;
+
+                const color = getCategoryColor(t.type, t.category);
+                html += `
+                        <div class="result-item">
+                            <div class="info">
+                                <div class="cat">
+                                    <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${color};margin-left:6px;"></span>
+                                    ${t.category || 'غير مصنف'} ${t.note ? '| ' + t.note : ''}
+                                </div>
+                                <div class="date">${formatDateDisplay(t.date)}</div>
+                            </div>
+                            <div class="amount ${t.type === 'income' ? 'income' : 'expense'}">
+                                ${t.type === 'income' ? '+' : '-'}${t.amount}
+                            </div>
+                        </div>
+                    `;
+            });
+
+            html += `
+                    <div class="total-result">
+                        الإجمالي: 🟢 دخل: ${totalIncome} | 🔴 مصروف: ${totalExpense} | 📊 الصافي: ${totalIncome - totalExpense}
+                    </div>
+                `;
+
+            resultsDiv.innerHTML = html;
+        }
+
+        // ===== تحديث كل شيء =====
+        function updateAll() {
+            updateBalance();
+            renderTransactions();
+            populateCategories();
+            renderInstallments();
+        }
+
+        // ===== أحداث =====
+        function switchPage(page) {
+            currentPage = page;
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + page).classList.add('active');
+
+            document.querySelectorAll('.nav-buttons button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.nav-buttons button[data-page="${page}"]`).classList.add('active');
+
+            if (page === 'installments') {
+                renderInstallments();
+            }
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btns button').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.filter-btns button[data-filter="${filter}"]`).classList.add('active');
+            renderTransactions();
+        }
+
+        document.getElementById('addBtn').addEventListener('click', addTransaction);
+
+        document.getElementById('typeSelect').addEventListener('change', function() {
+            populateCategories();
+        });
+
+        document.getElementById('amountInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTransaction();
+            }
+        });
+
+        document.getElementById('dateFilterModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDateFilter();
+            }
+        });
+
+        setInterval(checkInstallments, 60000);
+
+        // ===== بدء التشغيل =====
+        loadData();
+
+        if ('Notification' in window && Notification.permission === 'default') {
+            document.getElementById('notifPermission').style.display = 'block';
+        } else if ('Notification' in window && Notification.permission === 'granted') {
+            document.getElementById('notifPermission').style.display = 'none';
+        }
+
+        populateCategories();
+        updateAll();
+        renderInstallments();
+        setTimeout(checkInstallments, 2000);
+
+        console.log('🚀 التطبيق جاهز!');
+        console.log('📊 عدد المعاملات:', transactions.length);
+        console.log('📅 عدد الأقساط:', transactions.filter(t => t.isInstallment).length);
+        console.log('📝 صيغة التاريخ: YYYY-MM-DD HH:MM:SS');
+    </script>
+
+</body>
+</html>
